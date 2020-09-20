@@ -1,204 +1,120 @@
+
+
+
 'use strict';
+const leftImagesElm = document.getElementById('left-image');
+const rightImagesElm = document.getElementById('right-image');
+const midImagesElm = document.getElementById('mid-image');
+Product.all = [];
+let round = 25;
+const imagesPath = ['bag.jpg', 'banana.jpg', 'bathroom.jpg', 'boots.jpg', 'breakfast.jpg', 'bubblegum.jpg', 'chair.jpg', 'cthulhu.jpg', 'dog-duck.jpg', 'dragon.jpg', 'pen.jpg', 'pet-sweep.jpg', 'scissors.jpg', 'shark.jpg', 'sweep.png', 'tauntaun.jpg', 'unicorn.jpg', 'usb.gif', 'water-can.jpg', 'wine-glass.jpg'];
+const imagesName = ['bag', 'banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb', 'water-can', 'wine-glass'];
 
-var app = document.getElementById('app');
-var clickRemining = 25;
-var photosOnSecondToLastScreen = [];
-var photosOnPreviousScreen = [];
-var photosOnScreen = [];
-
-function Images (name, filename){
-  this.name = name;
-  this.src = filename;
-  this.clickCount = 0;
-  this.displayCount = 0;
-}
-var imageGroup;
-try{
-  imageGroup = JSON.parse(localStorage.imageGroup);
-} catch(error){
-  var bag =  new Images('Bag','img/bag.jpg');
-  var banana =  new Images('Banana Cutter', 'img/banana.jpg');
-  var bathroom =  new Images ('Tablet Holder for Bathroom', 'img/bathroom.jpg');
-  var boots =  new Images('Boots', 'img/boots.jpg');
-  var breakfast =  new Images('breakfast', 'img/breakfast.jpg');
-  var bubblegum =  new Images('Bubble Gum', 'img/bubblegum.jpg');
-  var chair =  new Images ('Comfy Chair', 'img/chair.jpg');
-  var cthulhu =  new Images('Cthulhu centerpeice', 'img/cthulhu.jpg');
-  var duckDog =  new Images('duck dog', 'img/dog-duck.jpg');
-  var dragon =  new Images ('Dragon', 'img/dragon.jpg');
-  var pen =  new Images('pen', 'img/pen.jpg');
-  var broomDog =  new Images('Broom Dog', 'img/pet-sweep.jpg');
-  var scissors =  new Images('scissors', 'img/scissors.jpg');
-  var shark =  new Images('Shark', 'img/shark.jpg');
-  var broomBaby =  new Images ('Broom Baby', 'img/sweep.png');
-  var tauntaun =  new Images ('tauntaun', 'img/tauntaun.jpg');
-  var unicorn =  new Images ('unicorn', 'img/unicorn.jpg');
-  var usb =  new Images ('USB', 'img/usb.gif');
-  var watering =  new Images ('Watering Can', 'img/water-can.jpg');
-  var wine =  new Images ('Wine Glass', 'img/wine-glass.jpg');
-
-  imageGroup = [bag, banana, bathroom, boots, breakfast, bubblegum, chair, cthulhu, duckDog, dragon, pen, broomDog, scissors, shark, broomBaby, tauntaun, unicorn, usb, watering, wine ];
+//Genrate Random Number
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
 
-function getRandomIndex (list){
-  return Math.floor(Math.random() * list.length);
+function Product(name, path) {
+  this.title = name;
+  this.path = `imgs/${path}`;
+  this.vote = 0;
+  this.shown = 0;
+  Product.all.push(this);
 }
 
-function getThreeImages (){
-  imageGroup = imageGroup.concat(photosOnSecondToLastScreen);
-  photosOnSecondToLastScreen = photosOnPreviousScreen;
-  photosOnPreviousScreen = photosOnScreen;
-  photosOnScreen = [];
-  var photo = imageGroup.splice(getRandomIndex(imageGroup), 1);
-  photosOnScreen = photosOnScreen.concat(photo);
-  var photo = imageGroup.splice(getRandomIndex(imageGroup), 1);
-  photosOnScreen = photosOnScreen.concat(photo);
-  var photo = imageGroup.splice(getRandomIndex(imageGroup), 1);
-  photosOnScreen = photosOnScreen.concat(photo);
-  return photosOnScreen;
+
+//RenderRightSection
+function render() {
+  let leftIndex = getRandomInt(0, Product.all.length);
+  let midIndex = getRandomInt(0, Product.all.length);
+  let rightIndex = getRandomInt(0, Product.all.length);
+  //No Replacte
+  while (midIndex === leftIndex) {
+    midIndex = getRandomInt(0, Product.all.length);
+  }
+  while (rightIndex === midIndex) {
+    rightIndex = getRandomInt(0, Product.all.length);
+  }
+  while (rightIndex === leftIndex) {
+    rightIndex = getRandomInt(0, Product.all.length);
+  }
+
+  Product.all[leftIndex].shown++;
+  Product.all[midIndex].shown++;
+  Product.all[rightIndex].shown++;
+
+  //
+  //Src Attribute
+  leftImagesElm.src = Product.all[leftIndex].path;
+  midImagesElm.src = Product.all[midIndex].path;
+  rightImagesElm.src = Product.all[rightIndex].path;
+  //Alt Attribute
+  leftImagesElm.alt = Product.all[leftIndex].title;
+  midImagesElm.alt = Product.all[midIndex].title;
+  rightImagesElm.alt = Product.all[rightIndex].title;
+  //Title Attribute
+  leftImagesElm.title = Product.all[leftIndex].title;
+  midImagesElm.title = Product.all[midIndex].title;
+  rightImagesElm.title = Product.all[rightIndex].title;
 }
 
-function handlePhotoClick(event){
-  var image = event.target;
-  photosToRender[image.id].clickCount++;
-  clickRemining--;
-  if (clickRemining > 0){
-    renderPhotoChoise();
-  } else if (clickRemining === 0){
-    imageGroup = imageGroup.concat(photosOnScreen, photosOnPreviousScreen, photosOnSecondToLastScreen);
-    renderChart();
-    displayChartTwo();
-    // getTable();
-    // getTableNumber();
-    try {
-      localStorage.imageGroup = JSON.stringify(imageGroup);
-    } catch (error){
-      console.log(error);
+//RenderLeftSection
+function renderResult() {
+  let articleElm = document.getElementById('result');
+  let pElm = document.createElement('p');
+  for (let i = 0; i < Product.all.length; i++) {
+    articleElm.appendChild(pElm);
+    pElm.textContent = `Image: ${Product.all[i].title} displayed (${Product.all[i].shown}) times, and gained( ${Product.all[i].vote} ) votes.`;
+    pElm = document.createElement('p');
+  }
+
+}
+//Event
+let sectionRight = document.getElementById('section-right');
+sectionRight.addEventListener('click', voting);
+
+function voting(event) {
+
+  if (event.target.id === 'left-image' || event.target.id === 'mid-image' || event.target.id === 'right-image') {
+
+    if (round <= 1) {
+      sectionRight.removeEventListener('click', voting);
+      renderResult();
+    }
+
+    for (let i = 0; i < Product.all.length; i++)
+      if (event.target.title === Product.all[i].title) {
+        Product.all[i].vote++;
+      }
+
+    round--;
+    render();
+  }
+
+}
+
+//Voting Round
+let votingRound = document.getElementById('votingRound');
+votingRound.addEventListener('click', rounds);
+function rounds(event) {
+  event.preventDefault();
+  if (event.target.id === 'submit') {
+    round = Number(document.getElementById('numRound').value);
+    if (round <= 0) {
+      sectionRight.removeEventListener('click', voting);
+      renderResult();
     }
   }
-}
-var photosToRender = getThreeImages();
-function renderPhotoChoise(){
-  photosToRender = getThreeImages();
-  app.textContent = '';
-  var imageElement;
-  for (var i = 0; i < photosToRender.length; i++){
-    photosToRender[i].displayCount++;
-    imageElement = document.createElement('img');
-    imageElement.src = photosToRender[i].src;
-    imageElement.id = '' + i;
-    imageElement.addEventListener('click', handlePhotoClick);
-    app.appendChild(imageElement);
-    console.log(photosToRender[i].clickCount);
-  }
-
+  if (event.target.id === 'Restart')
+    location.reload();
 }
 
-function renderChart() {
 
-  var canvas = document.getElementById('chart-canvas1');
-  var ctx = canvas.getContext('2d');
-  var data = {
-    labels: ['bag', 'banana', 'bathroom', 'boots','breakfast', 'bubblegum', 'chair', 'cthulhu', 'duckDog', 'dragon', 'pen', 'broomDog', 'scissors', 'shark', 'broomBaby', 'tauntaun', 'unicorn', 'usb', 'watering', 'wine' ],
-    datasets:[{
-      label: 'Clicks',
-      backgroundColor: '#2F343B',
-      borderWidth: 1,
-      data: [imageGroup[0].clickCount,
-        imageGroup[1].clickCount,
-        imageGroup[2].clickCount,
-        imageGroup[3].clickCount,
-        imageGroup[4].clickCount,
-        imageGroup[5].clickCount,
-        imageGroup[6].clickCount,
-        imageGroup[7].clickCount,
-        imageGroup[8].clickCount,
-        imageGroup[9].clickCount,
-        imageGroup[10].clickCount,
-        imageGroup[11].clickCount,
-        imageGroup[12].clickCount,
-        imageGroup[13].clickCount,
-        imageGroup[14].clickCount,
-        imageGroup[15].clickCount,
-        imageGroup[16].clickCount,
-        imageGroup[17].clickCount,
-        imageGroup[18].clickCount,
-        imageGroup[19].clickCount]},
-    {
-      label: 'Displayed',
-      backgroundColor: '#703030',
-      borderWidth: 1,
-      data: [imageGroup[0].displayCount, imageGroup[1].displayCount, imageGroup[2].displayCount, imageGroup[3].displayCount, imageGroup[4].displayCount, imageGroup[5].displayCount, imageGroup[6].displayCount, imageGroup[7].displayCount, imageGroup[8].displayCount, imageGroup[9].displayCount, imageGroup[10].displayCount, imageGroup[11].displayCount, imageGroup[12].displayCount, imageGroup[13].displayCount, imageGroup[14].displayCount, imageGroup[15].displayCount, imageGroup[16].displayCount, imageGroup[17].displayCount, imageGroup[18].displayCount, imageGroup[19].displayCount ]}
-    ]
-  };
-  canvas.height = '200';
-  canvas.width = '500';
-  var myBarChart = new Chart(ctx, {
-    type: 'bar',
-    data: data,
-  });
-}
-function displayChartTwo() {
-
-  var canvas = document.getElementById('chart-canvas2');
-  var ctx = canvas.getContext('2d');
-  var data = {
-    labels: ['bag', 'banana', 'bathroom', 'boots','breakfast', 'bubblegum', 'chair', 'cthulhu', 'duckDog', 'dragon', 'pen', 'broomDog', 'scissors', 'shark', 'broomBaby', 'tauntaun', 'unicorn', 'usb', 'watering', 'wine' ],
-    datasets:[{
-      label: 'Percentages',
-      backgroundColor:
-        '#E3CDA4',
-      borderWidth: 1,
-      data: [Math.round((imageGroup[0].clickCount / imageGroup[0].displayCount) * 100),
-        Math.round((imageGroup[1].clickCount / imageGroup[1].displayCount) * 100), Math.round((imageGroup[2].clickCount / imageGroup[2].displayCount) * 100), Math.round((imageGroup[3].clickCount / imageGroup[3].displayCount) * 100), Math.round((imageGroup[4].clickCount / imageGroup[4].displayCount) * 100),
-        Math.round((imageGroup[5].clickCount / imageGroup[5].displayCount) * 100),
-        Math.round((imageGroup[6].clickCount / imageGroup[6].displayCount) * 100), Math.round((imageGroup[7].clickCount / imageGroup[7].displayCount) * 100), Math.round((imageGroup[8].clickCount / imageGroup[8].displayCount) * 100), Math.round((imageGroup[9].clickCount / imageGroup[9].displayCount) * 100),
-        Math.round((imageGroup[10].clickCount / imageGroup[10].displayCount) * 100), Math.round((imageGroup[11].clickCount / imageGroup[11].displayCount) * 100), Math.round((imageGroup[12].clickCount / imageGroup[12].displayCount) * 100), Math.round((imageGroup[13].clickCount / imageGroup[13].displayCount) * 100),
-        Math.round((imageGroup[14].clickCount / imageGroup[14].displayCount) * 100),
-        Math.round((imageGroup[15].clickCount / imageGroup[15].displayCount) * 100), Math.round((imageGroup[16].clickCount / imageGroup[16].displayCount) * 100), Math.round((imageGroup[17].clickCount / imageGroup[17].displayCount) * 100), Math.round((imageGroup[18].clickCount / imageGroup[18].displayCount) * 100),
-        Math.round((imageGroup[19].clickCount / imageGroup[19].displayCount) * 100) ]},
-    ]
-  };
-  canvas.height = '200';
-  canvas.width = '500';
-  var myBarChart = new Chart(ctx, {
-    type: 'bar',
-    data: data,
-  });
+for (let i = 0; i < imagesPath.length; i++) {
+  new Product(imagesName[i], imagesPath[i]);
 }
 
-renderPhotoChoise();
-
-// function getTable (){
-//   var result = document.getElementById('form');
-//   var table = document.createElement('table');
-//   table.id = table;
-//   var titleRow = document.createElement('tr');
-//   var titleItem = document.createElement('th');
-//   titleItem.textContent = 'Item';
-//   var titleViews = document.createElement('th');
-//   titleViews.textContent = 'Views';
-//   var titleClicks = document.createElement('th');
-//   titleClicks.textContent = 'Clicks';
-//   var titlePercetage = document.createElement('th');
-//   titlePercetage.textContent = '% of Clicks When Viewed';
-//   var titleRecomended = document.createElement('th');
-//   titleRecomended.textContent = 'Recomended';
-//   table.appendChild(titleItem);
-//   table.appendChild(titleViews);
-//   table.appendChild(titleClicks);
-//   table.appendChild(titlePercetage);
-//   table.appendChild(titleRecomended);
-//   result.appendChild(table);
-// }
-
-// function getTableNumber(){
-//   var table = document.getElementById('table');
-//   for (var i = 0; i < imageGroup.length; i++){
-//     var bodyRow = document.createElement('tr');
-//     table.appendChild(bodyRow);
-//     var item = document.createElement('td');
-//     item.textContent = imageGroup[i].name;
-//     item.appendChild(data);
-//   }
-// }
+render();
