@@ -1,120 +1,218 @@
+var item = [
+  'bag.jpg',
+  'banana.jpg',
+  'bathroom.jpg',
+  'boots.jpg',
+  'breakfast.jpg',
+  'bubblegum.jpg',
+  'chair.jpg',
+  'cthulhu.jpg',
+  'dog-duck.jpg',
+  'dragon.jpg',
+  'pen.jpg',
+  'pet-sweep.jpg',
+  'scissors.jpg',
+  'shark.jpg',
+  'sweep.png',
+  'tauntaun.jpg',
+  'unicorn.jpg',
+  'usb.gif',
+  'water-can.jpg',
+  'wine-glass.jpg'
+];
 
-
-
-'use strict';
-const leftImagesElm = document.getElementById('left-image');
-const rightImagesElm = document.getElementById('right-image');
-const midImagesElm = document.getElementById('mid-image');
-Product.all = [];
-let round = 25;
-const imagesPath = ['bag.jpg', 'banana.jpg', 'bathroom.jpg', 'boots.jpg', 'breakfast.jpg', 'bubblegum.jpg', 'chair.jpg', 'cthulhu.jpg', 'dog-duck.jpg', 'dragon.jpg', 'pen.jpg', 'pet-sweep.jpg', 'scissors.jpg', 'shark.jpg', 'sweep.png', 'tauntaun.jpg', 'unicorn.jpg', 'usb.gif', 'water-can.jpg', 'wine-glass.jpg'];
-const imagesName = ['bag', 'banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb', 'water-can', 'wine-glass'];
-
-//Genrate Random Number
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+let pollProducts = [];
+function Product(item) {
+  this.name = item.split('.').slice(0, -1).join('.');
+  this.path = `imgs/${item}`;
+  this.votes = 0;
+  this.views = 0;
+  pollProducts.push(this);
 }
 
-function Product(name, path) {
-  this.title = name;
-  this.path = `imgs/${path}`;
-  this.vote = 0;
-  this.shown = 0;
-  Product.all.push(this);
+// add products from items array to Product object
+for (let i = 0; i < item.length; i++) {
+  new Product(item[i]);
 }
 
-
-//RenderRightSection
-function render() {
-  let leftIndex = getRandomInt(0, Product.all.length);
-  let midIndex = getRandomInt(0, Product.all.length);
-  let rightIndex = getRandomInt(0, Product.all.length);
-  //No Replacte
-  while (midIndex === leftIndex) {
-    midIndex = getRandomInt(0, Product.all.length);
-  }
-  while (rightIndex === midIndex) {
-    rightIndex = getRandomInt(0, Product.all.length);
-  }
-  while (rightIndex === leftIndex) {
-    rightIndex = getRandomInt(0, Product.all.length);
-  }
-
-  Product.all[leftIndex].shown++;
-  Product.all[midIndex].shown++;
-  Product.all[rightIndex].shown++;
-
-  //
-  //Src Attribute
-  leftImagesElm.src = Product.all[leftIndex].path;
-  midImagesElm.src = Product.all[midIndex].path;
-  rightImagesElm.src = Product.all[rightIndex].path;
-  //Alt Attribute
-  leftImagesElm.alt = Product.all[leftIndex].title;
-  midImagesElm.alt = Product.all[midIndex].title;
-  rightImagesElm.alt = Product.all[rightIndex].title;
-  //Title Attribute
-  leftImagesElm.title = Product.all[leftIndex].title;
-  midImagesElm.title = Product.all[midIndex].title;
-  rightImagesElm.title = Product.all[rightIndex].title;
+function randomNumber(min, max) {
+  return Number(Math.floor(Math.random() * (max - min + 1)) + min);
 }
 
-//RenderLeftSection
-function renderResult() {
-  let articleElm = document.getElementById('result');
-  let pElm = document.createElement('p');
-  for (let i = 0; i < Product.all.length; i++) {
-    articleElm.appendChild(pElm);
-    pElm.textContent = `Image: ${Product.all[i].title} displayed (${Product.all[i].shown}) times, and gained( ${Product.all[i].vote} ) votes.`;
-    pElm = document.createElement('p');
-  }
+const leftImageEl = document.getElementById('left-img');
+const centerImageEl = document.getElementById('center-img');
+const rightImageEl = document.getElementById('right-img');
+const pollSection = document.getElementById('poll-section');
+const roundsForm = document.getElementById('rounds-form');
 
-}
-//Event
-let sectionRight = document.getElementById('section-right');
-sectionRight.addEventListener('click', voting);
+let leftIndex;
+let centerIndex;
+let rightIndex;
+// array with invalid index to allow first pass
+let indexes = [];
 
-function voting(event) {
+// checking the same image doesn't come up more than once
+function checkIndex() {
+  leftIndex = randomNumber(0, pollProducts.length - 1);
+  centerIndex = randomNumber(0, pollProducts.length - 1);
+  rightIndex = randomNumber(0, pollProducts.length - 1);
 
-  if (event.target.id === 'left-image' || event.target.id === 'mid-image' || event.target.id === 'right-image') {
-
-    if (round <= 1) {
-      sectionRight.removeEventListener('click', voting);
-      renderResult();
+  while (indexes.indexOf(leftIndex) !== -1 || indexes.indexOf(centerIndex) !== -1 || indexes.indexOf(rightIndex) !== -1 || leftIndex === centerIndex || centerIndex === rightIndex || leftIndex === rightIndex) {
+    while (indexes.indexOf(leftIndex) !== -1) {
+      leftIndex = randomNumber(0, pollProducts.length - 1);
     }
-
-    for (let i = 0; i < Product.all.length; i++)
-      if (event.target.title === Product.all[i].title) {
-        Product.all[i].vote++;
+    while (indexes.indexOf(centerIndex) !== -1) {
+      centerIndex = randomNumber(0, pollProducts.length - 1);
+    }
+    while (indexes.indexOf(rightIndex) !== -1) {
+      rightIndex = randomNumber(0, pollProducts.length - 1);
+    }
+    while (leftIndex === centerIndex || centerIndex === rightIndex || leftIndex === rightIndex) {
+      if (leftIndex === centerIndex || centerIndex === rightIndex) {
+        while (centerIndex === leftIndex || centerIndex === rightIndex) {
+          centerIndex = randomNumber(0, pollProducts.length - 1);
+        }
       }
-
-    round--;
-    render();
-  }
-
-}
-
-//Voting Round
-let votingRound = document.getElementById('votingRound');
-votingRound.addEventListener('click', rounds);
-function rounds(event) {
-  event.preventDefault();
-  if (event.target.id === 'submit') {
-    round = Number(document.getElementById('numRound').value);
-    if (round <= 0) {
-      sectionRight.removeEventListener('click', voting);
-      renderResult();
+      if (leftIndex === rightIndex) {
+        while (rightIndex === leftIndex || rightIndex === centerIndex) {
+          rightIndex = randomNumber(0, pollProducts.length - 1);
+        }
+      }
     }
   }
-  if (event.target.id === 'Restart')
-    location.reload();
+  indexes = [];
+  indexes.push(leftIndex);
+  indexes.push(centerIndex);
+  indexes.push(rightIndex);
+  console.log(indexes);
 }
 
-
-for (let i = 0; i < imagesPath.length; i++) {
-  new Product(imagesName[i], imagesPath[i]);
+function imagesRender() {
+  //add to views counter
+  checkIndex();
+  pollProducts[leftIndex].views++;
+  pollProducts[centerIndex].views++;
+  pollProducts[rightIndex].views++;
+  //adding src path
+  leftImageEl.src = pollProducts[leftIndex].path;
+  centerImageEl.src = pollProducts[centerIndex].path;
+  rightImageEl.src = pollProducts[rightIndex].path;
+  //adding alt text
+  leftImageEl.alt = pollProducts[leftIndex].name;
+  centerImageEl.alt = pollProducts[centerIndex].name;
+  rightImageEl.alt = pollProducts[rightIndex].name;
+  //adding title text
+  leftImageEl.title = pollProducts[leftIndex].name;
+  centerImageEl.title = pollProducts[centerIndex].name;
+  rightImageEl.title = pollProducts[rightIndex].name;
 }
 
-render();
+// calculating percentage and rendering results
+function percentile(item) {
+  let x = Number(item.votes / (clicks - 1)) * 100;
+  return Math.round(x) + '%';
+}
+function resultsRender() {
+  const pollResultsArticle = document.createElement('article');
+  pollSection.appendChild(pollResultsArticle);
+  const resultsHead = document.createElement('h3');
+  resultsHead.textContent = 'Thank you for participating! The results of your poll are as follows:';
+  pollResultsArticle.appendChild(resultsHead);
+  const resultUl = document.createElement('ul');
+  pollResultsArticle.appendChild(resultUl);
+  for (let i = 0; i < pollProducts.length; i++) {
+    const resultLi = document.createElement('li');
+    resultLi.textContent = pollProducts[i].name + ' had ' + pollProducts[i].votes + ' votes after being shown ' + pollProducts[i].views + ' times. This, as a percentile, equals: ' + percentile(pollProducts[i]);
+    resultUl.appendChild(resultLi);
+  }
+}
+
+let rounds = 25;
+roundsForm.addEventListener('submit', function (event) {
+  event.preventDefault();
+  const roundNumber = Number(event.target.round.value);
+  // console.log('roundNumber:' + roundNumber);
+  if (roundNumber === null || isNaN(roundNumber) || roundNumber === ' ') {
+    rounds = 25;
+  } else {
+    rounds = roundNumber;
+  }
+  roundsForm.reset();
+  imagesRender();
+});
+// console.log('rounds:' + rounds);
+
+let clicks = 1;
+pollSection.addEventListener('click', clickHandler);
+function clickHandler(event) {
+  if (clicks < rounds) {
+    if (event.target.id !== 'poll-section') {
+      for (let i = 0; i < pollProducts.length; i++) {
+        if (pollProducts[i].name === event.target.title) {
+          pollProducts[i].votes++;
+          clicks++;
+        }
+      }
+      imagesRender();
+      console.log(pollProducts);
+      console.log('clicks:' + clicks);
+    }
+  } else if (clicks === rounds) {
+    if (event.target.id !== 'poll-section') {
+      for (let i = 0; i < pollProducts.length; i++) {
+        if (pollProducts[i].name === event.target.title) {
+          pollProducts[i].votes++;
+          clicks++;
+        }
+      }
+      document.getElementById('poll-section').removeEventListener('click', clickHandler);
+      resultsRender();
+      totals();
+      chartRender();
+    }
+  }
+}
+
+// canvas chart
+function chartRender() {
+  var ctx = document.getElementById('myChart').getContext('2d');
+  // ctx.defaults.global.defaultFontSize = '15px';
+  var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'bar',
+    // The data for our dataset
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Votes',
+        backgroundColor: 'rgb(220, 20, 60, 0.5)',
+        borderColor: 'rgb(220, 20, 60)',
+        data: votesTotal
+      }]
+    },
+    // Configuration options go here
+    options: {}
+  });
+  addData(chart, 'Views', 'rgb(0, 0, 139, 0.5)', 'rgb(0, 0, 139)', viewsTotal);
+}
+
+function addData(chart, label, color, border, data) {
+  chart.data.datasets.push({
+    label: label,
+    backgroundColor: color,
+    borderColor: border,
+    data: data
+  });
+  chart.update();
+}
+
+let votesTotal = [];
+let viewsTotal = [];
+let chartLabels = [];
+function totals(){
+  for (let i = 0; i < pollProducts.length; i++) {
+    votesTotal.push(pollProducts[i].votes);
+    viewsTotal.push(pollProducts[i].views);
+    chartLabels.push(pollProducts[i].name);
+  }
+}

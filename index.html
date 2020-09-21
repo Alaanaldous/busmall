@@ -2,52 +2,83 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="css/style.css">
-    <title>Bus Mall</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Tammudu+2:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Product Poll</title>
 </head>
 
 <body>
-    <header>
-        <img src="" alt="">
-        <h1></h1>
-    </header>
 
-    <main>
-        <section id="section-right">
-                <form id="votingRound" >
-                  <label>Vote Here</label>
-                  <input id="numRound" type="number">
-                  <input  type="submit" id="submit">
-                  <input id="Restart"  type="submit" value="Restart">
+  <header>
+    <section id="ab">
+        
+      <img src="imgs/logo.png" alt="logo" id="logo">
+      <h1>Bus Mall</h1>
+    </section>
 
-                  
-             </form>
-          
+    <section id='nav-bar'>
+      <nav>
+        <ul>
+          <li><a href="index.html">Products Poll</a></li>
+          <li><a href="http://ammanbus.jo/storage/file-uploads/AmmanBusMap.png"  target="_blank">Bus Routes</a></li>
+          <li><a href="#page-footer">Contact US</a></li>
+        </ul>
+      </nav>
+    </section>
+  </header>
+  
+  <main>
+    <section id="intro">
+      <h1>
+        Product Catalog Poll
+      </h1>
+      <p>
+        We are please that you have agreed to take part in our market research study. 
+        In short, you will now be presented with different sets of product images, each 
+        set is a group of three items. Once you begin, you will take part in twenty-five rounds,
+        after which a list showing your selections will appear. 
+      </p>
+      <p>
+        Kindly note, if you feel you do not have time for 25 rounds, or would like to do more than
+        25 rounds you may set a different number of rounds in the box below. 
+      </p>
+      <form id="rounds-form" onsubmit="display = 'none'">
+        <label for="round">Please enter adjusted number of rounds (this is not a required field, default is 25):</label>
+        <input type="number" id="round" name="round" min="2 " max="50" placeholder="25" value="25">
+        <br>
+        <input type="submit" id= "submit" value="Begin">
+      </form>
+      <img src="imgs/AmmanRoutes.png" alt="Bus Lines" id='bus-lines'>
+    </section>
 
-            <article id="ArticleSubmit">
-                <img id="left-image" src="" alt="">
-                <img id="mid-image" src="" alt="">
-                <img id="right-image" src="" alt="">
-            </article>
-            <article>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Impedit reprehenderit consectetur rerum
-                    voluptates error consequatur deserunt provident, nostrum temporibus facilis quae eum id aliquid
-                    dolores eveniet libero.</p>
+    <section>
+      <article id="poll-section">
+        <h3>Please select the image of the product you are most likely to buy.</h3>
+        <br>
+        <img id="left-img" src="" alt="" title="">
+        <img id="center-img" src="" alt="" title="">
+        <img id="right-img" src="" alt="" title="">
+      </article>
+      <article id='canvas'>
+        <canvas id="myChart"></canvas>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+      </article>
+    </section>
 
-            </article>
-        </section>
+  </main>
 
-        <section id="section-left">
-            <article id="result">
-                <h3>Result</h3>
-            </article>
-        </section>
-    </main>
+  <footer id="page-footer">
+    <section>
+      Contact Us: +962 0 0000 0000
+    </section>
+    <section id="copy"> &copy; ALL RIGHT RESERVED 2020</section>
+  </footer>
 
-    <footer>
+  <script src="js/app.js"></script>
 
-    </footer>
-    <script src="js/app.js"></script>
 </body>
 
 </html>
