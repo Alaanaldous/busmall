@@ -1,3 +1,5 @@
+'use strict';
+
 var item = [
   'bag.jpg',
   'banana.jpg',
@@ -34,7 +36,7 @@ function Product(item) {
 for (let i = 0; i < item.length; i++) {
   new Product(item[i]);
 }
-
+// generates random number
 function randomNumber(min, max) {
   return Number(Math.floor(Math.random() * (max - min + 1)) + min);
 }
@@ -45,10 +47,57 @@ const rightImageEl = document.getElementById('right-img');
 const pollSection = document.getElementById('poll-section');
 const roundsForm = document.getElementById('rounds-form');
 
+let storedVotes = [];
+let storedViews = [];
+let totalVotesArray = [];
+let totalViewsArray = [];
+// set empty arrays for storing and adding votes and views
+for (let i = 0; i < item.length; i++) {
+  storedVotes[i] = 0;
+  storedViews[i] = 0;
+  totalVotesArray[i] = 0;
+  totalViewsArray[i] = 0;
+}
+// console.log('votes before adjust: ' + storedVotes);
+
+// storing the data in local storage
+function storeData(){
+  let totalVotesString = JSON.stringify(storedVotes);
+  let totalViewsString = JSON.stringify(storedViews);
+
+  localStorage.setItem('votes', totalVotesString);
+  localStorage.setItem('views', totalViewsString);
+}
+// retrieving the data from local storage
+function retrieveData(){
+  let totalVotesString = localStorage.getItem('votes');
+  let totalViewsString = localStorage.getItem('views');
+
+  let totalVotesArrayIn = JSON.parse(totalVotesString);
+  let totalViewsArrayIn = JSON.parse(totalViewsString);
+
+  if (totalVotesArrayIn){
+    for (let i = 0 ; i < totalViewsArrayIn.length; i ++){
+      totalVotesArray[i] = totalVotesArrayIn[i];
+      totalViewsArray[i] = totalViewsArrayIn[i];
+    }
+  }
+}
+// add votes and views into their own arrays and adjusts to include data from local
+function adjustData(){
+  for (let i = 0; i < item.length; i++) {
+    storedVotes[i] = Number(pollProducts[i].votes + totalVotesArray[i]);
+    storedViews[i] = Number(pollProducts[i].views + totalViewsArray[i]);
+  }
+  // console.log('votes after adjust: ' + storedVotes);
+}
+
+// unique indexes for pictures
 let leftIndex;
 let centerIndex;
 let rightIndex;
-// array with invalid index to allow first pass
+
+// empty array to allow first pass
 let indexes = [];
 
 // checking the same image doesn't come up more than once
@@ -84,6 +133,7 @@ function checkIndex() {
   indexes.push(leftIndex);
   indexes.push(centerIndex);
   indexes.push(rightIndex);
+  // console.log to ensure that each set of three is different from the previous set
   console.log(indexes);
 }
 
@@ -115,9 +165,9 @@ function percentile(item) {
 function resultsRender() {
   const pollResultsArticle = document.createElement('article');
   pollSection.appendChild(pollResultsArticle);
-  const resultsHead = document.createElement('h3');
-  resultsHead.textContent = 'Thank you for participating! The results of your poll are as follows:';
-  pollResultsArticle.appendChild(resultsHead);
+  const yourResultsHead = document.createElement('h3');
+  yourResultsHead.textContent = 'Thank you for participating! The results of your current poll are as follows:';
+  pollResultsArticle.appendChild(yourResultsHead);
   const resultUl = document.createElement('ul');
   pollResultsArticle.appendChild(resultUl);
   for (let i = 0; i < pollProducts.length; i++) {
@@ -125,8 +175,12 @@ function resultsRender() {
     resultLi.textContent = pollProducts[i].name + ' had ' + pollProducts[i].votes + ' votes after being shown ' + pollProducts[i].views + ' times. This, as a percentile, equals: ' + percentile(pollProducts[i]);
     resultUl.appendChild(resultLi);
   }
+  const allResultsHead = document.createElement('h3');
+  allResultsHead.textContent = 'Below is a chart that represents the results of all polls:';
+  pollResultsArticle.appendChild(allResultsHead);
 }
 
+// event listener for form (user round adjustment)
 let rounds = 25;
 roundsForm.addEventListener('submit', function (event) {
   event.preventDefault();
@@ -140,8 +194,8 @@ roundsForm.addEventListener('submit', function (event) {
   roundsForm.reset();
   imagesRender();
 });
-// console.log('rounds:' + rounds);
 
+// event listener for clicks (counts votes and rounds)
 let clicks = 1;
 pollSection.addEventListener('click', clickHandler);
 function clickHandler(event) {
@@ -167,20 +221,31 @@ function clickHandler(event) {
       }
       document.getElementById('poll-section').removeEventListener('click', clickHandler);
       resultsRender();
+      retrieveData();
+      adjustData();
+      storeData();
       totals();
       chartRender();
     }
   }
 }
 
+let votesTotal = [];
+let viewsTotal = [];
+let chartLabels = [];
+function totals(){
+  for (let i = 0; i < pollProducts.length; i++) {
+    votesTotal.push(storedVotes[i]);
+    viewsTotal.push(storedViews[i]);
+    chartLabels.push(pollProducts[i].name);
+  }
+}
+
 // canvas chart
 function chartRender() {
   var ctx = document.getElementById('myChart').getContext('2d');
-  // ctx.defaults.global.defaultFontSize = '15px';
   var chart = new Chart(ctx, {
-    // The type of chart we want to create
     type: 'bar',
-    // The data for our dataset
     data: {
       labels: chartLabels,
       datasets: [{
@@ -190,12 +255,11 @@ function chartRender() {
         data: votesTotal
       }]
     },
-    // Configuration options go here
     options: {}
   });
   addData(chart, 'Views', 'rgb(0, 0, 139, 0.5)', 'rgb(0, 0, 139)', viewsTotal);
 }
-
+// add dataset to chart
 function addData(chart, label, color, border, data) {
   chart.data.datasets.push({
     label: label,
@@ -204,15 +268,4 @@ function addData(chart, label, color, border, data) {
     data: data
   });
   chart.update();
-}
-
-let votesTotal = [];
-let viewsTotal = [];
-let chartLabels = [];
-function totals(){
-  for (let i = 0; i < pollProducts.length; i++) {
-    votesTotal.push(pollProducts[i].votes);
-    viewsTotal.push(pollProducts[i].views);
-    chartLabels.push(pollProducts[i].name);
-  }
 }
